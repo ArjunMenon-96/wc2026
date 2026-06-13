@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WC2026 · Android widget preview</title>
+<style>
+  :root{
+    --green:#3CAC3B;--hermes:#2A398D;--red:#E61D25;--txt:#f1f3f1;--mut:#aeb3b1;
+    --b-green:#46BE5A;--b-indigo:#1E2A78;--b-red:#C0392B;--b-yellow:#E8F542;--b-purple:#5B16E0;--b-orange:#E8511E;
+  }
+  *{margin:0;box-sizing:border-box}
+  body{background:#15171a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--txt);
+       min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 16px 60px}
+  .wallnote{color:#7c828a;font-size:12px;letter-spacing:.5px}
+  /* simulated home-screen wallpaper behind widgets */
+  .wall{width:360px;background:
+        radial-gradient(120% 90% at 20% 10%, #243b2e, transparent 50%),
+        radial-gradient(120% 90% at 90% 80%, #2a2440, transparent 55%), #0d0f12;
+        border-radius:26px;padding:22px 16px;display:flex;flex-direction:column;gap:18px;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+  .sz{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#6b7178;font-weight:800;margin:0 2px -8px}
+
+  .w{background:#000;border-radius:22px;overflow:hidden;position:relative;border:1px solid #1c1f24}
+  .strip{position:absolute;top:0;left:0;right:0;height:5px;display:flex}
+  .strip i{flex:1}
+  .livetag{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:1px;color:#fff}
+  .ld{width:7px;height:7px;border-radius:50%;background:var(--red)}
+  .imp{font-family:Impact,"Arial Narrow Bold",sans-serif;letter-spacing:.5px}
+  .fl{border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.5)}
+
+  /* 4x2 large */
+  .w-lg{padding:14px 14px 14px}
+  .w-lg .top{display:flex;justify-content:space-between;align-items:center;margin:4px 0 10px}
+  .w-lg .meta{font-size:10px;color:var(--mut)}
+  .w-lg .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .w-lg .tm{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
+  .w-lg .tm.r{flex-direction:row-reverse}
+  .w-lg .tm img{width:32px;flex:none}
+  .w-lg .tm b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .w-lg .mid{text-align:center;flex:none}
+  .w-lg .sc{font-size:38px;letter-spacing:1px;white-space:nowrap;line-height:1}
+  .w-lg .min{font-size:11px;color:var(--green);text-align:center;margin-top:4px;font-weight:700}
+
+  /* 4x1 row */
+  .w-row{padding:12px 14px;display:flex;align-items:center;gap:10px}
+  .w-row img{width:26px}
+  .w-row .nm{font-size:13px;font-weight:700;flex:1}
+  .w-row .nm.r{text-align:right}
+  .w-row .sc{font-size:24px}
+  .w-row .mn{font-size:9px;color:var(--red);font-weight:800;text-align:center;width:34px}
+
+  /* 2x2 small */
+  .w-sm{width:150px;padding:12px 12px 14px}
+  .w-sm .livetag{justify-content:center;margin:4px 0 10px}
+  .w-sm .pair{display:flex;justify-content:space-around;align-items:center}
+  .w-sm .c{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .w-sm .c img{width:30px}
+  .w-sm .c b{font-size:11px}
+  .w-sm .c .s{font-size:30px}
+  .w-sm .mn{text-align:center;font-size:11px;color:var(--green);font-weight:700;margin-top:8px}
+
+  .two{display:flex;gap:14px;align-items:flex-start}
+  /* 5x3 extra-large */
+  .w-xl{padding:16px 18px 14px}
+  .w-xl .top{display:flex;justify-content:space-between;align-items:center;margin:4px 0 14px}
+  .w-xl .meta{font-size:10px;color:var(--mut)}
+  .w-xl .feat{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:14px}
+  .w-xl .tm{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
+  .w-xl .tm.r{flex-direction:row-reverse}
+  .w-xl .tm img{width:34px;flex:none}
+  .w-xl .tm b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .w-xl .sc{font-size:40px;letter-spacing:1px;flex:none;text-align:center;white-space:nowrap;line-height:1}
+  .w-xl .sc .min{display:block;font-size:11px;color:var(--green);font-weight:700;letter-spacing:0;text-align:center;margin-top:4px}
+  .w-xl .more{border-top:1px solid #1c1f24;padding-top:8px}
+  .w-xl .mrow{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px}
+  .w-xl .mrow img{width:20px;border-radius:2px}
+  .w-xl .mrow .mt{flex:1;color:var(--txt)}
+  .w-xl .mrow .ms{font-weight:800}
+  .w-xl .mrow .mst{font-size:9px;color:var(--mut);width:34px;text-align:right}
+  .wlogo{height:20px;width:auto;opacity:.95}
+  .w-row .wlogo{height:18px}
+  .w-sm .wlogo{height:16px;position:absolute;top:9px;right:9px}
+</style>
+</head>
+<body>
+  <div class="wallnote">How the home-screen widget looks · live data</div>
+  <div class="wall">
+
+    <div class="sz">4 × 2 — large</div>
+    <div class="w w-lg">
+      <div class="strip"><i style="background:var(--b-green)"></i><i style="background:var(--b-indigo)"></i><i style="background:var(--b-red)"></i><i style="background:var(--b-yellow)"></i><i style="background:var(--b-purple)"></i><i style="background:var(--b-orange)"></i></div>
+      <div class="top"><div class="livetag"><span class="ld"></span>LIVE · GROUP A</div><img class="wlogo" src="assets/emblem.svg" alt="WC26"></div>
+      <div class="row">
+        <div class="tm"><img class="fl" src="https://flagcdn.com/w80/mx.png"><b>MEXICO</b></div>
+        <div class="mid"><div class="sc imp">2 - 0</div><div class="min">~76:04</div></div>
+        <div class="tm r"><img class="fl" src="https://flagcdn.com/w80/za.png"><b>S. AFRICA</b></div>
+      </div>
+    </div>
+
+    <div class="sz">5 × 3 — extra large</div>
+    <div class="w w-xl">
+      <div class="strip"><i style="background:var(--b-green)"></i><i style="background:var(--b-indigo)"></i><i style="background:var(--b-red)"></i><i style="background:var(--b-yellow)"></i><i style="background:var(--b-purple)"></i><i style="background:var(--b-orange)"></i></div>
+      <div class="top"><div class="livetag"><span class="ld"></span>LIVE · GROUP A</div><img class="wlogo" src="assets/emblem.svg" alt="WC26"></div>
+      <div class="feat">
+        <div class="tm"><img class="fl" src="https://flagcdn.com/w80/mx.png"><b>MEXICO</b></div>
+        <div class="sc imp">2 - 0<span class="min">~76:04</span></div>
+        <div class="tm r"><img class="fl" src="https://flagcdn.com/w80/za.png"><b>S. AFRICA</b></div>
+      </div>
+      <div class="more">
+        <div class="mrow"><img class="fl" src="https://flagcdn.com/w80/ca.png"><span class="mt">Canada v Bosnia</span><span class="ms">1 - 1</span><span class="mst">58'</span></div>
+        <div class="mrow"><img class="fl" src="https://flagcdn.com/w80/us.png"><span class="mt">USA v Paraguay</span><span class="ms"></span><span class="mst">21:00</span></div>
+        <div class="mrow"><img class="fl" src="https://flagcdn.com/w80/ar.png"><span class="mt">Argentina v Morocco</span><span class="ms"></span><span class="mst">23:30</span></div>
+      </div>
+    </div>
+
+    <div class="sz">4 × 1 — row</div>
+    <div class="w w-row">
+      <img class="fl" src="https://flagcdn.com/w80/mx.png">
+      <span class="nm">Mexico</span>
+      <span class="sc imp">2</span><span class="mn">76'</span><span class="sc imp">0</span>
+      <span class="nm r">S. Africa</span>
+      <img class="fl" src="https://flagcdn.com/w80/za.png">
+      <img class="wlogo" src="assets/emblem.svg" alt="WC26" style="margin-left:4px">
+    </div>
+
+    <div class="sz">2 × 2 — small</div>
+    <div class="two">
+      <div class="w w-sm">
+        <img class="wlogo" src="assets/emblem.svg" alt="WC26">
+        <div class="livetag"><span class="ld"></span>LIVE 76'</div>
+        <div class="pair">
+          <div class="c"><img class="fl" src="https://flagcdn.com/w80/mx.png"><b>MEX</b><span class="s imp">2</span></div>
+          <div class="c"><img class="fl" src="https://flagcdn.com/w80/za.png"><b>RSA</b><span class="s imp">0</span></div>
+        </div>
+        <div class="mn">~76:04</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="wallnote">tap widget → opens app · updates every ~15 min (Android limit) or on app open</div>
+</body>
+</html>

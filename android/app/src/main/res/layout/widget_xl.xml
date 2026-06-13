@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_bg"
+    android:padding="16dp">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="5dp" android:orientation="horizontal">
+        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:background="@color/b_green"/>
+        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:background="@color/b_indigo"/>
+        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:background="@color/b_red"/>
+        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:background="@color/b_yellow"/>
+        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:background="@color/b_purple"/>
+        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:background="@color/b_orange"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="8dp">
+        <View android:id="@+id/w_live" android:layout_width="7dp" android:layout_height="7dp"
+            android:layout_marginEnd="6dp" android:background="@color/wc_red"/>
+        <TextView android:id="@+id/w_status" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:textColor="@color/wc_mut" android:textSize="11sp" android:textStyle="bold"/>
+        <ImageView android:id="@+id/w_emblem" android:layout_width="22dp" android:layout_height="22dp"
+            android:src="@drawable/wc_emblem" android:contentDescription="Refresh"/>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="8dp" android:paddingBottom="12dp">
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:orientation="vertical" android:gravity="center">
+            <ImageView android:id="@+id/w_home_flag" android:layout_width="36dp" android:layout_height="24dp"
+                android:scaleType="fitCenter" android:contentDescription="home"/>
+            <TextView android:id="@+id/w_home" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/wc_text" android:textSize="14sp" android:textStyle="bold"
+                android:paddingTop="5dp" android:maxLines="1"/>
+        </LinearLayout>
+        <TextView android:id="@+id/w_score" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="@color/wc_text" android:textSize="40sp" android:textStyle="bold"
+            android:singleLine="true" android:paddingStart="6dp" android:paddingEnd="6dp"/>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:orientation="vertical" android:gravity="center">
+            <ImageView android:id="@+id/w_away_flag" android:layout_width="36dp" android:layout_height="24dp"
+                android:scaleType="fitCenter" android:contentDescription="away"/>
+            <TextView android:id="@+id/w_away" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/wc_text" android:textSize="14sp" android:textStyle="bold"
+                android:paddingTop="5dp" android:maxLines="1"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1C1F24"/>
+
+    <LinearLayout android:id="@+id/m1_box" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="7dp" android:paddingBottom="3dp">
+        <ImageView android:id="@+id/m1_flag" android:layout_width="20dp" android:layout_height="14dp"
+            android:scaleType="fitCenter" android:layout_marginEnd="8dp" android:contentDescription="m1"/>
+        <TextView android:id="@+id/m1_text" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:textColor="@color/wc_text" android:textSize="12sp" android:maxLines="1"/>
+        <TextView android:id="@+id/m1_score" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="@color/wc_mut" android:textSize="11sp" android:textStyle="bold"/>
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/m2_box" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="4dp" android:paddingBottom="3dp">
+        <ImageView android:id="@+id/m2_flag" android:layout_width="20dp" android:layout_height="14dp"
+            android:scaleType="fitCenter" android:layout_marginEnd="8dp" android:contentDescription="m2"/>
+        <TextView android:id="@+id/m2_text" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:textColor="@color/wc_text" android:textSize="12sp" android:maxLines="1"/>
+        <TextView android:id="@+id/m2_score" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="@color/wc_mut" android:textSize="11sp" android:textStyle="bold"/>
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/m3_box" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="4dp">
+        <ImageView android:id="@+id/m3_flag" android:layout_width="20dp" android:layout_height="14dp"
+            android:scaleType="fitCenter" android:layout_marginEnd="8dp" android:contentDescription="m3"/>
+        <TextView android:id="@+id/m3_text" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:textColor="@color/wc_text" android:textSize="12sp" android:maxLines="1"/>
+        <TextView android:id="@+id/m3_score" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textColor="@color/wc_mut" android:textSize="11sp" android:textStyle="bold"/>
+    </LinearLayout>
+</LinearLayout>

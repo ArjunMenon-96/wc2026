@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WC2026 · Samsung S22 preview</title>
+<style>
+  :root{--g:#111}
+  *{margin:0;box-sizing:border-box}
+  body{min-height:100vh;background:#1a1a1a;display:flex;flex-direction:column;align-items:center;
+       justify-content:center;gap:14px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#bbb;padding:24px}
+  .label{font-size:13px;letter-spacing:.5px}
+  .label b{color:#fff}
+  /* Samsung Galaxy S22: 360 x 780 CSS px (1080 x 2340 @3x), 6.1" */
+  .phone{position:relative;width:360px;height:780px;background:#000;border-radius:38px;
+         padding:10px;box-shadow:0 0 0 3px #2a2a2a,0 20px 60px rgba(0,0,0,.6)}
+  .screen{position:relative;width:100%;height:100%;border-radius:30px;overflow:hidden;background:#000}
+  /* centered punch-hole camera (S22 style) */
+  .cam{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:9px;height:9px;
+       border-radius:50%;background:#0a0a0a;box-shadow:inset 0 0 0 1.5px #1c1c1c;z-index:10}
+  iframe{width:100%;height:100%;border:0;display:block}
+  .meta{font-size:11px;color:#777}
+</style>
+</head>
+<body>
+  <div class="label"><b>Samsung Galaxy S22</b> &nbsp;·&nbsp; 360 × 780 dp &nbsp;·&nbsp; 1080 × 2340 px @3x</div>
+  <div class="phone">
+    <div class="screen">
+      <div class="cam"></div>
+      <iframe src="index.html" title="WC2026 app"></iframe>
+    </div>
+  </div>
+  <div class="meta">live ESPN data · scroll inside the frame</div>
+</body>
+</html>

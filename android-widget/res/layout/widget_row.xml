@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:background="@drawable/widget_bg"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+
+    <ImageView android:id="@+id/w_emblem" android:layout_width="18dp" android:layout_height="18dp"
+        android:src="@drawable/wc_emblem" android:layout_marginEnd="10dp" android:contentDescription="Refresh"/>
+    <ImageView android:id="@+id/w_home_flag" android:layout_width="26dp" android:layout_height="18dp"
+        android:scaleType="fitCenter" android:layout_marginEnd="8dp" android:contentDescription="home"/>
+    <TextView android:id="@+id/w_home" android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1" android:textColor="@color/wc_text" android:textSize="13sp"
+        android:textStyle="bold" android:maxLines="1"/>
+
+    <TextView android:id="@+id/w_score" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="@color/wc_text" android:textSize="22sp" android:textStyle="bold"
+        android:paddingStart="6dp" android:paddingEnd="6dp"/>
+    <TextView android:id="@+id/w_status" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:textColor="@color/wc_red" android:textSize="9sp" android:textStyle="bold"/>
+    <View android:id="@+id/w_live" android:layout_width="0dp" android:layout_height="0dp"/>
+
+    <TextView android:id="@+id/w_away" android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1" android:gravity="end" android:textColor="@color/wc_text"
+        android:textSize="13sp" android:textStyle="bold" android:maxLines="1"/>
+    <ImageView android:id="@+id/w_away_flag" android:layout_width="26dp" android:layout_height="18dp"
+        android:scaleType="fitCenter" android:layout_marginStart="8dp" android:contentDescription="away"/>
+</LinearLayout>

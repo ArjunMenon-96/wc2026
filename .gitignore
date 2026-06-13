@@ -1,0 +1,18 @@
+# deps / build artifacts
+node_modules/
+www/
+android/app/build/
+android/build/
+android/.gradle/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/capacitor.settings.gradle
+android/app/capacitor.build.gradle
+*.apk
+*.aab
+
+# os / editor
+.DS_Store
+.idea/
+*.iml
+local.properties

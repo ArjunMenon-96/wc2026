@@ -1,0 +1,23 @@
+{
+  "name": "wc2026-live",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FIFA World Cup 2026 companion app — live scores, fixtures, groups, knockout bracket, commentary, news.",
+  "scripts": {
+    "sync:web": "rm -rf www && mkdir www && cp -r index.html manifest.json sw.js assets data www/",
+    "cap:add": "npm run sync:web && npx cap add android",
+    "cap:sync": "npm run sync:web && npx cap sync android",
+    "cap:open": "npx cap open android",
+    "build:apk": "npm run sync:web && npx cap sync android && cd android && ./gradlew assembleDebug"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.0"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.1.0",
+    "@capacitor/android": "^6.1.0",
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/splash-screen": "^6.0.0",
+    "@capacitor/status-bar": "^6.0.0"
+  }
+}

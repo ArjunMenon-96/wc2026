@@ -1,0 +1,20 @@
+<!-- 1) Add this intent-filter INSIDE the existing <activity android:name=".MainActivity"> so
+     widget taps (wc26://match/<id>) open the app and route to the match. -->
+<intent-filter>
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="wc26" android:host="match" />
+</intent-filter>
+
+<!-- 2) Add this receiver inside <application> in android/app/src/main/AndroidManifest.xml -->
+<receiver
+    android:name="app.wc2026.live.ScoreWidget"
+    android:exported="false">
+    <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+    </intent-filter>
+    <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/score_widget_info" />
+</receiver>

@@ -1,0 +1,17 @@
+{
+  "appId": "app.wc2026.live",
+  "appName": "WC2026 Live",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#000000"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "backgroundColor": "#000000",
+      "showSpinner": false
+    }
+  }
+}

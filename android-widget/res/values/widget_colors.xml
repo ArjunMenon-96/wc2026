@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="wc_bg">#000000</color>
+    <color name="wc_text">#F1F3F1</color>
+    <color name="wc_mut">#AEB3B1</color>
+    <color name="wc_green">#3CAC3B</color>
+    <color name="wc_red">#E61D25</color>
+    <color name="b_green">#46BE5A</color>
+    <color name="b_indigo">#1E2A78</color>
+    <color name="b_red">#C0392B</color>
+    <color name="b_yellow">#E8F542</color>
+    <color name="b_purple">#5B16E0</color>
+    <color name="b_orange">#E8511E</color>
+    <string name="widget_desc">WC2026 live score on your home screen</string>
+</resources>
