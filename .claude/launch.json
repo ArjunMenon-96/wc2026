@@ -6,6 +6,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8081"],
       "port": 8081
+    },
+    {
+      "name": "wc2026-netlify",
+      "runtimeExecutable": "netlify",
+      "runtimeArgs": ["dev"],
+      "port": 8888
     }
   ]
 }

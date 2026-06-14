@@ -1,5 +1,5 @@
 /* WC2026 service worker — network-first shell (no stale lock-in) + runtime caches */
-const VER='v2';
+const VER='v3';
 const SHELL='wc2026-shell-'+VER;
 const RUNTIME='wc2026-runtime-'+VER;
 const SHELL_FILES=['./','./index.html','./manifest.json','./assets/emblem.svg','./assets/icon.svg'];
@@ -38,4 +38,20 @@ self.addEventListener('fetch',e=>{
   }
   /* other static (icons/css/js): cache-first */
   e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request)));
+});
+
+/* ---- Push notifications (kickoff / goal / full-time for subscribed matches) ---- */
+self.addEventListener('push',e=>{
+  let d={}; try{ d=e.data?e.data.json():{}; }catch(err){}
+  e.waitUntil(self.registration.showNotification(d.title||'WC2026',{
+    body:d.body||'', icon:'./assets/icon.svg', badge:'./assets/icon.svg',
+    tag:d.tag, data:{matchId:d.matchId}
+  }));
+});
+self.addEventListener('notificationclick',e=>{
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({type:'window'}).then(cs=>{
+    for(const c of cs) if('focus'in c) return c.focus();
+    return self.clients.openWindow('./');
+  }));
 });

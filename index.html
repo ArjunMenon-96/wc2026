@@ -157,6 +157,8 @@
   .vline{width:1px;align-self:stretch;background:var(--line)}
   .stat-live{color:var(--live);font-weight:800;font-size:10px;letter-spacing:1px;display:flex;align-items:center;gap:5px;justify-content:center}
   .ft{font-size:10px;color:var(--mut);letter-spacing:1px}
+  .bell{margin-top:6px;font-size:14px;line-height:1;background:none;border:none;padding:2px;cursor:pointer;opacity:.45;filter:grayscale(1);transition:.15s}
+  .bell.on{opacity:1;filter:none;text-shadow:0 0 10px rgba(60,172,59,.6)}
 
   /* Groups */
   .gtitle{display:flex;align-items:center;gap:8px;font-weight:800;margin:0 2px 10px}
@@ -404,7 +406,7 @@
     }
     if(e)e.preventDefault();
   }
-  document.querySelectorAll('.tab,.nav-i').forEach(el=>el.addEventListener('click',()=>{primeNotif();go(el.dataset.t);}));
+  document.querySelectorAll('.tab,.nav-i').forEach(el=>el.addEventListener('click',()=>go(el.dataset.t)));
   let SCHED_VIEW='upcoming';
   document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
     SCHED_VIEW=b.dataset.view;
@@ -522,11 +524,12 @@
               <div class="row">${crest(m.away,m.awayFlag,'fl')} ${m.away} ${scoreFor(m,'away')}</div>
             </div>
             <div class="vline"></div>
-            <div class="time">${timeCell(m)}</div>
+            <div class="time">${timeCell(m)}${m.status!=='FT'?`<button class="bell ${bellMatches.has(String(m.id))?'on':''}" data-bell="${m.id}" aria-label="Notify for this match">${bellMatches.has(String(m.id))?'🔔':'🔕'}</button>`:''}</div>
           </div>`).join('')}
       </div>`).join('');
     document.getElementById('sched').innerHTML=out;
     document.querySelectorAll('#sched .match').forEach(el=>el.addEventListener('click',()=>openMatch(el.dataset.mid)));
+    document.querySelectorAll('#sched .bell').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();toggleBell(el.dataset.mid,el);}));
   }
   const ROUND_ORDER=['Round of 32','Round of 16','Quarterfinals','Semifinals','Third Place','Final'];
   function renderBracket(matches){
@@ -841,21 +844,60 @@
     if(el)el.textContent=`~${LIVE_MIN.num}:${String(LIVE_MIN.sec).padStart(2,'0')}`;
   },1000);
 
-  const prevScore={}; let notifPrimed=false;
-  function primeNotif(){ if(notifPrimed)return; notifPrimed=true;
-    if('Notification'in window&&Notification.permission==='default') Notification.requestPermission(); }
+  const prevScore={};
   function notifyGoals(matches){
     matches.forEach(m=>{
       if(m.status==='SCHEDULED')return;
       const key=m.id, cur=m.homeScore+'-'+m.awayScore, was=prevScore[key];
       if(was!==undefined&&was!==cur&&m.status==='LIVE'){
         const txt=`${m.home} ${m.homeScore}–${m.awayScore} ${m.away}  ·  ${m.minute||'LIVE'}`;
-        if('Notification'in window&&Notification.permission==='granted')
+        if(!bellMatches.has(String(key))&&'Notification'in window&&Notification.permission==='granted')
           new Notification('⚽ GOAL — World Cup 2026',{body:txt,icon:'assets/icon.svg',tag:'wc26-'+key});
         toast(txt);
       }
       prevScore[key]=cur;
     });
+  }
+
+  /* ---- Push notifications (per-match bell) ---- */
+  const VAPID_PUBLIC_KEY='BAZNbdcw4THu5EDX739q0ADRrsHkFPK8jH8P2wMiak58aR3Ix7s-l7UGZXM1KUowsrzwQihX9VUW6j3zRHs2cK4';
+  const bellMatches=new Set(JSON.parse(localStorage.getItem('bellMatches')||'[]'));
+  function saveBellMatches(){ localStorage.setItem('bellMatches',JSON.stringify([...bellMatches])); }
+  function urlBase64ToUint8Array(base64String){
+    const padding='='.repeat((4-base64String.length%4)%4);
+    const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+    const raw=atob(base64), out=new Uint8Array(raw.length);
+    for(let i=0;i<raw.length;i++) out[i]=raw.charCodeAt(i);
+    return out;
+  }
+  async function getPushSubscription(){
+    if(!('serviceWorker'in navigator)||!('PushManager'in window)) return null;
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)});
+    return sub;
+  }
+  async function toggleBell(matchId,el){
+    matchId=String(matchId);
+    if('Notification'in window&&Notification.permission==='default'){
+      const perm=await Notification.requestPermission();
+      if(perm!=='granted')return;
+    }
+    if(!('Notification'in window)||Notification.permission!=='granted'){ toast('Enable notifications in browser settings'); return; }
+    const enabled=!bellMatches.has(matchId);
+    if(enabled) bellMatches.add(matchId); else bellMatches.delete(matchId);
+    saveBellMatches();
+    if(el){ el.classList.toggle('on',enabled); el.textContent=enabled?'🔔':'🔕'; }
+    try{
+      const sub=await getPushSubscription();
+      if(!sub)return;
+      await fetch('/.netlify/functions/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub.toJSON(),matchId,enabled})});
+    }catch(e){}
+  }
+  async function primePush(){
+    if(!('Notification'in window)||!('serviceWorker'in navigator))return;
+    if(Notification.permission==='default') await Notification.requestPermission();
+    if(Notification.permission==='granted') getPushSubscription().catch(()=>{});
   }
   function toast(msg){
     let t=document.getElementById('toast');
@@ -892,7 +934,7 @@
 
   /* ---- Service worker (offline + installable) ---- */
   if('serviceWorker'in navigator)
-    window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+    window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(()=>primePush()).catch(()=>{}));
 
   skeleton('sched',6); skeleton('bracketbox',3); skeleton('groupsbox',4); skeleton('newsbox',4);
   refreshAll().then(()=>refreshLive());

@@ -18,6 +18,8 @@
     "@capacitor/android": "^6.1.0",
     "@capacitor/app": "^6.0.0",
     "@capacitor/splash-screen": "^6.0.0",
-    "@capacitor/status-bar": "^6.0.0"
+    "@capacitor/status-bar": "^6.0.0",
+    "@netlify/blobs": "^8.1.0",
+    "web-push": "^3.6.7"
   }
 }
