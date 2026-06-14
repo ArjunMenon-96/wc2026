@@ -1,5 +1,5 @@
 /* WC2026 service worker — network-first shell (no stale lock-in) + runtime caches */
-const VER='v4';
+const VER='v5';
 const SHELL='wc2026-shell-'+VER;
 const RUNTIME='wc2026-runtime-'+VER;
 const SHELL_FILES=['./','./index.html','./manifest.json','./assets/emblem.svg','./assets/icon.png'];
