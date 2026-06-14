@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="WC2026" />
-<link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
-<link rel="apple-touch-icon" href="assets/icon.svg" />
+<link rel="icon" href="assets/icon.png" type="image/png" />
+<link rel="apple-touch-icon" href="assets/icon.png" />
 <style>
   :root{
     /* Brand palette:
@@ -852,7 +852,7 @@
       if(was!==undefined&&was!==cur&&m.status==='LIVE'){
         const txt=`${m.home} ${m.homeScore}–${m.awayScore} ${m.away}  ·  ${m.minute||'LIVE'}`;
         if(!bellMatches.has(String(key))&&'Notification'in window&&Notification.permission==='granted')
-          new Notification('⚽ GOAL — World Cup 2026',{body:txt,icon:'assets/icon.svg',tag:'wc26-'+key});
+          new Notification('⚽ GOAL — World Cup 2026',{body:txt,icon:'assets/icon.png',tag:'wc26-'+key});
         toast(txt);
       }
       prevScore[key]=cur;

@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#000"/>
-  <g font-family="Impact, 'Arial Black', sans-serif" font-weight="900" text-anchor="middle">
-    <text x="205" y="300" font-size="190" fill="#fff">2</text>
-    <text x="320" y="350" font-size="190" fill="#3CAC3B">6</text>
-  </g>
-  <rect x="120" y="346" width="272" height="26" fill="#3CAC3B" opacity="0.9"/>
-</svg>

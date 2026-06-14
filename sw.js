@@ -1,8 +1,8 @@
 /* WC2026 service worker — network-first shell (no stale lock-in) + runtime caches */
-const VER='v3';
+const VER='v4';
 const SHELL='wc2026-shell-'+VER;
 const RUNTIME='wc2026-runtime-'+VER;
-const SHELL_FILES=['./','./index.html','./manifest.json','./assets/emblem.svg','./assets/icon.svg'];
+const SHELL_FILES=['./','./index.html','./manifest.json','./assets/emblem.svg','./assets/icon.png'];
 
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(SHELL).then(c=>c.addAll(SHELL_FILES)).then(()=>self.skipWaiting()));
@@ -44,7 +44,7 @@ self.addEventListener('fetch',e=>{
 self.addEventListener('push',e=>{
   let d={}; try{ d=e.data?e.data.json():{}; }catch(err){}
   e.waitUntil(self.registration.showNotification(d.title||'WC2026',{
-    body:d.body||'', icon:'./assets/icon.svg', badge:'./assets/icon.svg',
+    body:d.body||'', icon:'./assets/icon.png', badge:'./assets/icon.png',
     tag:d.tag, data:{matchId:d.matchId}
   }));
 });
