@@ -529,7 +529,7 @@
       </div>`).join('');
     document.getElementById('sched').innerHTML=out;
     document.querySelectorAll('#sched .match').forEach(el=>el.addEventListener('click',()=>openMatch(el.dataset.mid)));
-    document.querySelectorAll('#sched .bell').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();toggleBell(el.dataset.mid,el);}));
+    document.querySelectorAll('#sched .bell').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();toggleBell(el.dataset.bell,el);}));
   }
   const ROUND_ORDER=['Round of 32','Round of 16','Quarterfinals','Semifinals','Third Place','Final'];
   function renderBracket(matches){
