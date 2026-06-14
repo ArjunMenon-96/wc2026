@@ -16,3 +16,6 @@ android/app/capacitor.build.gradle
 .idea/
 *.iml
 local.properties
+
+# netlify
+.netlify/

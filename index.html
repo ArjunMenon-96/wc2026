@@ -198,6 +198,12 @@
   .news p{font-size:11.5px;color:var(--mut);line-height:1.45}
   .news .ago{font-size:10px;color:var(--mut);margin-top:6px}
 
+  /* Videos */
+  .vidwrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--card);height:calc(100vh - 280px);min-height:420px}
+  .vidwrap iframe{display:block;width:100%;height:100%;border:0;background:#000}
+  .vidopen{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-weight:700;font-size:13px;text-decoration:none}
+  .vidopen:active{background:var(--card2)}
+
   /* Bottom nav */
   nav{position:fixed;bottom:0;left:0;right:0;z-index:40;background:rgba(0,0,0,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line)}
   .nwrap{max-width:760px;margin:0 auto;display:flex;justify-content:space-around;padding:9px 8px 14px}
@@ -315,6 +321,7 @@
     <div class="tab" data-t="bracket">Bracket</div>
     <div class="tab" data-t="commentary">Commentary</div>
     <div class="tab" data-t="news">News</div>
+    <div class="tab" data-t="videos">Videos</div>
   </div>
 
   <!-- SCHEDULE -->
@@ -355,7 +362,17 @@
     <h2 class="st">Latest News</h2>
     <div id="newsbox"><p style="color:var(--mut);padding:20px;text-align:center">Loading news…</p></div>
   </section>
-  <footer class="legal">Scores &amp; info only — no video. Not affiliated with or endorsed by FIFA. Data: ESPN · Flags: flagcdn.</footer>
+
+  <!-- VIDEOS (RoxieStreams — match videos, reviews & commentary) -->
+  <section id="videos">
+    <h2 class="st">Videos &amp; Commentary</h2>
+    <div class="vidwrap">
+      <iframe id="vidframe" title="RoxieStreams" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="no-referrer-when-downgrade" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-orientation-lock"></iframe>
+    </div>
+    <a class="vidopen" href="https://roxiestreams.su/soccer" target="_blank" rel="noopener">⤴ Open in browser</a>
+  </section>
+
+  <footer class="legal">Scores &amp; info only for Schedule/Groups/Bracket/News. Videos tab loads roxiestreams.su. Not affiliated with or endorsed by FIFA. Data: ESPN · Flags: flagcdn.</footer>
 </main>
 
 <nav>
@@ -365,6 +382,7 @@
     <div class="nav-i" data-t="bracket"><span class="ni">🏆</span>Bracket</div>
     <div class="nav-i" data-t="commentary"><span class="ni">🎙️</span>Live</div>
     <div class="nav-i" data-t="news"><span class="ni">📰</span>News</div>
+    <div class="nav-i" data-t="videos"><span class="ni">🎥</span>Videos</div>
   </div>
 </nav>
 
@@ -380,6 +398,10 @@
     if(t==='groups')refreshGroups();
     else if(t==='news')refreshNews();
     else if(t==='commentary'&&window.ALL_MATCHES)followFeatured(window.ALL_MATCHES);
+    else if(t==='videos'){
+      const f=document.getElementById('vidframe');
+      if(!f.src)f.src='https://roxiestreams.su/soccer';
+    }
     if(e)e.preventDefault();
   }
   document.querySelectorAll('.tab,.nav-i').forEach(el=>el.addEventListener('click',()=>{primeNotif();go(el.dataset.t);}));

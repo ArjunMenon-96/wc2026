@@ -4,7 +4,7 @@
   "private": true,
   "description": "FIFA World Cup 2026 companion app — live scores, fixtures, groups, knockout bracket, commentary, news.",
   "scripts": {
-    "sync:web": "rm -rf www && mkdir www && cp -r index.html manifest.json sw.js assets data www/",
+    "sync:web": "rm -rf www && mkdir www && cp -r index.html manifest.json sw.js assets www/",
     "cap:add": "npm run sync:web && npx cap add android",
     "cap:sync": "npm run sync:web && npx cap sync android",
     "cap:open": "npx cap open android",
