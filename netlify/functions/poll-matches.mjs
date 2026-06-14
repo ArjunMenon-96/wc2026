@@ -1,7 +1,7 @@
 import { getStore } from '@netlify/blobs';
 import webpush from 'web-push';
 
-const ESPN_TODAY = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
+const ESPN_TODAY = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719';
 const ST = { in: 'LIVE', post: 'FT', pre: 'SCHEDULED' };
 
 export default async () => {
@@ -11,7 +11,7 @@ export default async () => {
     process.env.VAPID_PRIVATE_KEY
   );
 
-  const res = await fetch(ESPN_TODAY + '?_=' + Date.now());
+  const res = await fetch(ESPN_TODAY + '&_=' + Date.now());
   const data = await res.json();
   const events = data.events || [];
   if (!events.length) return new Response('no matches today');
