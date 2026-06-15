@@ -202,9 +202,22 @@
 
   /* Videos */
   .vidwrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--card);height:calc(100vh - 280px);min-height:420px}
-  .vidwrap iframe{display:block;width:100%;height:100%;border:0;background:#000}
+  .vidwrap iframe{display:block;width:100%;height:100%;border:0;background:transparent;position:relative;z-index:1}
   .vidopen{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-weight:700;font-size:13px;text-decoration:none}
   .vidopen:active{background:var(--card2)}
+
+  /* Video maintenance fallback (shows behind iframe if stream is down) */
+  .vidmaint{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;gap:14px;
+    background:linear-gradient(160deg,#cc1f1f 0%,#ff5e1a 28%,#0b5e3a 55%,#1d3f8f 85%,#0a0a0a 100%)}
+  .vidmaint .vm-icon{width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;
+    animation:vmPulse 1.8s ease-in-out infinite}
+  .vidmaint .vm-icon svg{width:32px;height:32px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .vidmaint h3{font-size:17px;font-weight:900;color:#fff;letter-spacing:.02em;text-shadow:0 1px 6px rgba(0,0,0,.3)}
+  .vidmaint p{font-size:12.5px;color:rgba(255,255,255,.85);max-width:280px;line-height:1.5}
+  .vidmaint .vm-retry{margin-top:4px;padding:10px 22px;border-radius:999px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.12);
+    color:#fff;font-weight:800;font-size:12.5px;cursor:pointer;backdrop-filter:blur(6px)}
+  .vidmaint .vm-retry:active{background:rgba(255,255,255,.25)}
+  @keyframes vmPulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.08);opacity:1}}
 
   /* Loader */
   #loader{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .4s ease;background:#cc1f1f}
@@ -404,6 +417,12 @@
   <section id="videos">
     <h2 class="st">Videos &amp; Commentary</h2>
     <div class="vidwrap">
+      <div class="vidmaint" id="vidmaint">
+        <div class="vm-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></div>
+        <h3>Stream Temporarily Unavailable</h3>
+        <p>We're having trouble reaching the video feed. It may be down for maintenance — please try again shortly.</p>
+        <button class="vm-retry" onclick="retryVideo()">Retry</button>
+      </div>
       <iframe id="vidframe" title="RoxieStreams" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="no-referrer-when-downgrade" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-orientation-lock"></iframe>
     </div>
     <a class="vidopen" href="https://roxiestreams.su/soccer" target="_blank" rel="noopener">⤴ Open in browser</a>
@@ -442,6 +461,11 @@
     if(e)e.preventDefault();
   }
   document.querySelectorAll('.tab,.nav-i').forEach(el=>el.addEventListener('click',()=>go(el.dataset.t)));
+
+  function retryVideo(){
+    const f=document.getElementById('vidframe');
+    f.src='https://roxiestreams.su/soccer?_=' + Date.now();
+  }
   let SCHED_VIEW='upcoming';
   document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
     SCHED_VIEW=b.dataset.view;
