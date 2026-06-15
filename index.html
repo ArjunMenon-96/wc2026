@@ -206,8 +206,19 @@
   .vidopen{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-weight:700;font-size:13px;text-decoration:none}
   .vidopen:active{background:var(--card2)}
 
+  /* Loader */
+  #loader{position:fixed;inset:0;z-index:9999;background:#0a0a0a;display:flex;align-items:center;justify-content:center;transition:opacity .4s ease}
+  #loader.hide{opacity:0;pointer-events:none}
+  #loader img{width:120px;height:120px;opacity:0;transform:scale(.4) rotate(-20deg);animation:emblemIn 2s cubic-bezier(.22,1,.36,1) forwards}
+  @keyframes emblemIn{
+    0%{opacity:0;transform:scale(.3) rotate(-25deg)}
+    55%{opacity:1;transform:scale(1.12) rotate(8deg)}
+    75%{transform:scale(.96) rotate(-3deg)}
+    100%{opacity:1;transform:scale(1) rotate(0)}
+  }
+
   /* Bottom nav */
-  nav{position:fixed;bottom:0;left:0;right:0;z-index:40;background:rgba(0,0,0,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+  nav{position:fixed;bottom:0;left:0;right:0;z-index:40;background:rgba(20,20,24,.55);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:1px solid rgba(255,255,255,.1)}
   .nwrap{max-width:760px;margin:0 auto;display:flex;justify-content:space-around;padding:9px 8px 14px}
   .nav-i{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;color:var(--mut);font-weight:700;cursor:pointer;flex:1}
   .nav-i .ni{font-size:19px}
@@ -297,6 +308,9 @@
 </style>
 </head>
 <body>
+<div id="loader">
+  <img src="assets/emblem.svg" alt="" onerror="this.style.display='none'" />
+</div>
 <header>
   <div class="hwrap">
     <div class="logo">
@@ -944,6 +958,8 @@
   setInterval(refreshAll,120000);     // full fixtures/bracket — slow
   setInterval(refreshGroups,60000);
   setInterval(refreshNews,300000);
+
+  setTimeout(()=>{ const l=document.getElementById('loader'); if(l){ l.classList.add('hide'); setTimeout(()=>l.remove(),400); } },2000);
 </script>
 </body>
 </html>
