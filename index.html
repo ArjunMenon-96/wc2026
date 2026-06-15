@@ -221,8 +221,10 @@
   nav{position:fixed;bottom:0;left:0;right:0;z-index:40;background:rgba(20,20,24,.55);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:1px solid rgba(255,255,255,.1)}
   .nwrap{max-width:760px;margin:0 auto;display:flex;justify-content:space-around;padding:9px 8px 14px}
   .nav-i{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;color:var(--mut);font-weight:700;cursor:pointer;flex:1}
-  .nav-i .ni{font-size:19px}
+  .nav-i .ni{font-size:19px;line-height:0}
+  .nav-i .ni svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .nav-i.active{color:var(--accent)}
+  .nav-i.active .ni svg{fill:currentColor;fill-opacity:.15}
   .legend{font-size:10px;color:var(--mut);margin:2px 2px 18px;display:flex;align-items:center;gap:6px}
   .legend i{width:9px;height:9px;border-radius:2px;background:var(--green);display:inline-block}
   /* schedule tools */
@@ -393,12 +395,12 @@
 
 <nav>
   <div class="nwrap">
-    <div class="nav-i active" data-t="schedule"><span class="ni">📅</span>Matches</div>
-    <div class="nav-i" data-t="videos"><span class="ni">🎥</span>Videos</div>
-    <div class="nav-i" data-t="groups"><span class="ni">📊</span>Groups</div>
-    <div class="nav-i" data-t="bracket"><span class="ni">🏆</span>Bracket</div>
-    <div class="nav-i" data-t="commentary"><span class="ni">🎙️</span>Live</div>
-    <div class="nav-i" data-t="news"><span class="ni">📰</span>News</div>
+    <div class="nav-i active" data-t="schedule"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></span>Matches</div>
+    <div class="nav-i" data-t="videos"><span class="ni"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="14" height="14" rx="2"/><path d="M16 9.5l5-2.5v10l-5-2.5"/></svg></span>Videos</div>
+    <div class="nav-i" data-t="groups"><span class="ni"><svg viewBox="0 0 24 24"><line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="19" y1="20" x2="19" y2="14"/></svg></span>Groups</div>
+    <div class="nav-i" data-t="bracket"><span class="ni"><svg viewBox="0 0 24 24"><path d="M4 4v6h6M4 18v-6h6M14 7h6M14 17h6M10 7v10"/></svg></span>Bracket</div>
+    <div class="nav-i" data-t="commentary"><span class="ni"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></span>Live</div>
+    <div class="nav-i" data-t="news"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="17" y2="13"/><line x1="7" y1="17" x2="13" y2="17"/></svg></span>News</div>
   </div>
 </nav>
 
