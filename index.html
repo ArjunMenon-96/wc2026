@@ -207,14 +207,38 @@
   .vidopen:active{background:var(--card2)}
 
   /* Loader */
-  #loader{position:fixed;inset:0;z-index:9999;background:#0a0a0a;display:flex;align-items:center;justify-content:center;transition:opacity .4s ease}
+  #loader{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .4s ease;
+    background:#0a0a0a radial-gradient(circle at 50% 50%,#1a1a1a 0%,#0a0a0a 70%);}
   #loader.hide{opacity:0;pointer-events:none}
-  #loader img{width:120px;height:120px;opacity:0;transform:scale(.4) rotate(-20deg);animation:emblemIn 2s cubic-bezier(.22,1,.36,1) forwards}
+  #loader::before,#loader::after{content:'';position:absolute;border-radius:50%;filter:blur(40px);opacity:.55;animation:loaderBlob 2s ease-in-out forwards}
+  #loader::before{width:60vmax;height:60vmax;background:conic-gradient(from 0deg,#ff3b30,#ffcc00,#34c759,#0a84ff,#af52de,#ff3b30);animation-name:loaderBlob1}
+  #loader::after{width:50vmax;height:50vmax;background:conic-gradient(from 180deg,#0a84ff,#34c759,#ffcc00,#ff3b30,#af52de,#0a84ff);animation-name:loaderBlob2}
+  #loader .ring{position:absolute;border:3px solid transparent;border-radius:50%;animation:ringSpin 2s linear forwards}
+  #loader .ring:nth-child(1){width:160px;height:160px;border-top-color:#ff3b30;border-right-color:#ffcc00;animation-duration:1.6s}
+  #loader .ring:nth-child(2){width:200px;height:200px;border-bottom-color:#0a84ff;border-left-color:#34c759;animation-duration:2.2s;animation-direction:reverse}
+  #loader img{position:relative;z-index:1;width:120px;height:120px;opacity:0;transform:scale(.4) rotate(-20deg);
+    filter:drop-shadow(0 0 0 rgba(255,255,255,0));animation:emblemIn 2s cubic-bezier(.22,1,.36,1) forwards}
   @keyframes emblemIn{
-    0%{opacity:0;transform:scale(.3) rotate(-25deg)}
-    55%{opacity:1;transform:scale(1.12) rotate(8deg)}
-    75%{transform:scale(.96) rotate(-3deg)}
-    100%{opacity:1;transform:scale(1) rotate(0)}
+    0%{opacity:0;transform:scale(.3) rotate(-25deg);filter:drop-shadow(0 0 0px rgba(255,204,0,0))}
+    40%{opacity:1;transform:scale(1.25) rotate(10deg);filter:drop-shadow(0 0 30px rgba(255,59,48,.8))}
+    60%{transform:scale(.92) rotate(-6deg);filter:drop-shadow(0 0 22px rgba(10,132,255,.8))}
+    80%{transform:scale(1.06) rotate(3deg);filter:drop-shadow(0 0 18px rgba(52,199,89,.7))}
+    100%{opacity:1;transform:scale(1) rotate(0);filter:drop-shadow(0 0 10px rgba(255,255,255,.35))}
+  }
+  @keyframes loaderBlob1{
+    0%{transform:translate(-60%,-60%) scale(.4) rotate(0deg);opacity:0}
+    50%{transform:translate(-50%,-50%) scale(1) rotate(180deg);opacity:.6}
+    100%{transform:translate(-50%,-50%) scale(1.3) rotate(360deg);opacity:0}
+  }
+  @keyframes loaderBlob2{
+    0%{transform:translate(-40%,-40%) scale(.4) rotate(0deg);opacity:0}
+    50%{transform:translate(-50%,-50%) scale(1.1) rotate(-180deg);opacity:.5}
+    100%{transform:translate(-50%,-50%) scale(1.4) rotate(-360deg);opacity:0}
+  }
+  @keyframes ringSpin{
+    0%{transform:rotate(0deg) scale(.5);opacity:0}
+    30%{opacity:1}
+    100%{transform:rotate(360deg) scale(1);opacity:0}
   }
 
   /* Bottom nav */
@@ -311,6 +335,8 @@
 </head>
 <body>
 <div id="loader">
+  <div class="ring"></div>
+  <div class="ring"></div>
   <img src="assets/emblem.svg" alt="" onerror="this.style.display='none'" />
 </div>
 <header>
