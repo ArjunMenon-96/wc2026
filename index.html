@@ -588,7 +588,7 @@
   }
   function renderSchedule(matches){
     const q=(document.getElementById('schq').value||'').toLowerCase().trim();
-    const today=new Date().toISOString().slice(0,10);
+    const _t=new Date(),today=`${_t.getFullYear()}-${String(_t.getMonth()+1).padStart(2,'0')}-${String(_t.getDate()).padStart(2,'0')}`;
     const results=SCHED_VIEW==='results';
     document.getElementById('jumptoday').style.display=results?'none':'';
     const upCount=matches.filter(m=>m.status!=='FT').length, resCount=matches.filter(m=>m.status==='FT').length;
@@ -707,7 +707,7 @@
         status:ST[c.status.type.state]||'SCHEDULED',
         minute:((c.status.type.shortDetail||c.status.displayClock||'').trim())||null,
         venue:(c.venue&&c.venue.fullName)||'',
-        date:ko.toISOString().slice(0,10),
+        date:`${ko.getFullYear()}-${String(ko.getMonth()+1).padStart(2,'0')}-${String(ko.getDate()).padStart(2,'0')}`,
         kickoff:ko.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}),
         koMs:ko.getTime()
       };
@@ -733,7 +733,7 @@
   const commLabel=m=>`${m.home} ${m.status!=='SCHEDULED'?m.homeScore+' – '+m.awayScore:'vs'} ${m.away}${m.status==='LIVE'?' · LIVE':''}`;
   function buildCommPicker(matches){
     const sel=document.getElementById('commpick'); if(!sel)return;
-    const today=new Date().toISOString().slice(0,10);
+    const _tc=new Date(),today=`${_tc.getFullYear()}-${String(_tc.getMonth()+1).padStart(2,'0')}-${String(_tc.getDate()).padStart(2,'0')}`;
     const list=matches.filter(m=>m.status==='LIVE')
       .concat(matches.filter(m=>m.status!=='LIVE'&&m.date===today));
     if(!list.length){sel.style.display='none';return;} sel.style.display='';
