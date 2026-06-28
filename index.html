@@ -975,6 +975,7 @@
     }
     if(!('Notification'in window)||Notification.permission!=='granted'){ toast('Enable notifications in browser settings'); return; }
     const enabled=!bellMatches.has(matchId);
+    if(enabled&&bellMatches.size>=5){ toast('Max 5 match alerts — turn one off first'); return; }
     if(enabled) bellMatches.add(matchId); else bellMatches.delete(matchId);
     saveBellMatches();
     if(el){ el.classList.toggle('on',enabled); el.textContent=enabled?'🔔':'🔕'; }

@@ -28,8 +28,13 @@ export default async (req) => {
     const existing = (await store.get(key, { type: 'json' })) || { subscription, matches: [] };
     existing.subscription = subscription;
     const matches = new Set(existing.matches || []);
-    if (enabled) matches.add(String(matchId));
-    else matches.delete(String(matchId));
+    if (enabled) {
+      if (matches.size >= 5 && !matches.has(String(matchId))) {
+        console.log(`[subscribe] rejected — key=${key.slice(0,12)}… already at 5-match cap`);
+        return new Response('Max 5 match alerts per subscriber', { status: 429 });
+      }
+      matches.add(String(matchId));
+    } else matches.delete(String(matchId));
     existing.matches = [...matches];
     await store.setJSON(key, existing);
     console.log(`[subscribe] saved — matches now: ${existing.matches}`);
