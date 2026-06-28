@@ -174,6 +174,7 @@
   .ft{font-size:10px;color:var(--mut);letter-spacing:1px}
   .bell{margin-top:6px;font-size:14px;line-height:1;background:none;border:none;padding:2px;cursor:pointer;opacity:.45;filter:grayscale(1);transition:.15s}
   .bell.on{opacity:1;filter:none;text-shadow:0 0 10px rgba(60,172,59,.6)}
+  .bell-receipt{display:block;margin-top:5px;font-size:9px;color:var(--mut);font-weight:700;letter-spacing:.2px}
 
   /* Groups */
   .gtitle{display:flex;align-items:center;gap:8px;font-weight:800;margin:0 2px 10px}
@@ -316,6 +317,13 @@
   /* match detail modal */
   #modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:none}
   #modal.show{display:block}
+  #favmodal{position:fixed;inset:0;z-index:81;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:none}
+  #favmodal.show{display:block}
+  .favteam{display:flex;align-items:center;gap:10px;padding:11px 4px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13.5px;font-weight:700}
+  .favteam img{width:22px;border-radius:3px}
+  .favteam.cur{color:var(--accent)}
+  .favstar{margin-left:6px;font-size:11px;color:var(--accent);font-weight:800}
+  .match.favmatch{border-left:3px solid var(--accent)}
   .sheet{position:absolute;left:0;right:0;bottom:0;max-height:88vh;overflow-y:auto;background:#0b0b0c;
     border-top:1px solid var(--line);border-radius:20px 20px 0 0;padding:6px 16px calc(28px + env(safe-area-inset-bottom))}
   .sheet .grab{width:40px;height:4px;border-radius:99px;background:var(--line);margin:8px auto 14px}
@@ -378,9 +386,16 @@
       <div>WORLD CUP <small>USA · CANADA · MEXICO</small></div>
     </div>
     <div class="spacer"></div>
+    <button class="pill" id="favbtn" style="cursor:pointer;border:none" onclick="openFavPicker()">⭐ <span id="favbtnlabel">Pick team</span></button>
     <div class="pill"><span class="dot"></span>Live</div>
   </div>
 </header>
+
+<div id="favmodal"><div class="sheet"><span class="mdclose" onclick="closeFavPicker()">✕</span><div class="grab"></div>
+  <h2 class="st" style="padding:0 16px 10px">Favorite Team</h2>
+  <input id="favsearch" placeholder="Search team…" style="margin:0 16px 10px;width:calc(100% - 32px);padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:13px" />
+  <div id="favlist" style="padding:0 16px 24px"></div>
+</div></div>
 
 <main>
   <!-- HERO LIVE (rendered from data/fixtures.json) -->
@@ -414,6 +429,8 @@
   <section id="groups">
     <h2 class="st">Group Standings · Live</h2>
     <div id="groupsbox"><p style="color:var(--mut);padding:20px;text-align:center">Loading standings…</p></div>
+    <h2 class="st" style="margin-top:22px">Top Scorers · Golden Boot</h2>
+    <div id="scorersbox"></div>
   </section>
 
   <!-- KNOCKOUT BRACKET -->
@@ -607,13 +624,13 @@
       <div class="daygroup" data-date="${d}"${d===today?' id="todayrow"':''}>
         <div class="dayhdr">${dayLabel(d)}</div>
         ${byDay[d].map(m=>`
-          <div class="match" data-mid="${m.id}">
+          <div class="match${getFavTeam()&&(m.home===getFavTeam()||m.away===getFavTeam())?' favmatch':''}" data-mid="${m.id}">
             <div class="t">
-              <div class="row">${crest(m.home,m.homeFlag,'fl')} ${m.home} ${scoreFor(m,'home')}</div>
-              <div class="row">${crest(m.away,m.awayFlag,'fl')} ${m.away} ${scoreFor(m,'away')}</div>
+              <div class="row">${crest(m.home,m.homeFlag,'fl')} ${m.home}${m.home===getFavTeam()?'<span class="favstar">★</span>':''} ${scoreFor(m,'home')}</div>
+              <div class="row">${crest(m.away,m.awayFlag,'fl')} ${m.away}${m.away===getFavTeam()?'<span class="favstar">★</span>':''} ${scoreFor(m,'away')}</div>
             </div>
             <div class="vline"></div>
-            <div class="time">${timeCell(m)}${m.status!=='FT'?`<button class="bell ${bellMatches.has(String(m.id))?'on':''}" data-bell="${m.id}" aria-label="Notify for this match">${bellMatches.has(String(m.id))?'🔔':'🔕'}</button>`:''}</div>
+            <div class="time">${timeCell(m)}${m.status!=='FT'?`<button class="bell ${bellMatches.has(String(m.id))?'on':''}" data-bell="${m.id}" aria-label="Notify for this match">${bellMatches.has(String(m.id))?'🔔':'🔕'}</button>`:bellMatches.has(String(m.id))?`<span class="bell-receipt" title="You were notified for this match">🔔 notified</span>`:''}</div>
           </div>`).join('')}
       </div>`).join('');
     document.getElementById('sched').innerHTML=out;
@@ -700,6 +717,13 @@
                   : /Round of 16/i.test(nm) ? 'Round of 16'
                   : /Round of 32/i.test(nm) ? 'Round of 32'
                   : '';
+      const goals=(c.details||[]).filter(x=>x.scoringPlay).map(x=>({
+        scorer:(x.athletesInvolved&&x.athletesInvolved[0]&&x.athletesInvolved[0].displayName)||'',
+        team:String(x.team&&x.team.id)===String(h.team.id)?'home':'away',
+        clock:(x.clock&&x.clock.displayValue)||'',
+        clockVal:(x.clock&&x.clock.value)||0,
+        own:!!x.ownGoal, pk:!!x.penaltyKick
+      }));
       return {
         id:e.id, group:gm?gm[1]:'', round, stage: round||'Group Stage',
         home:tidyTeam(h.team.displayName), homeFlag:'', away:tidyTeam(a.team.displayName), awayFlag:'',
@@ -709,7 +733,7 @@
         venue:(c.venue&&c.venue.fullName)||'',
         date:`${ko.getFullYear()}-${String(ko.getMonth()+1).padStart(2,'0')}-${String(ko.getDate()).padStart(2,'0')}`,
         kickoff:ko.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'}),
-        koMs:ko.getTime()
+        koMs:ko.getTime(), goals
       };
     });
   }
@@ -756,7 +780,7 @@
       showError('sched','No data feed reachable.',refreshAll); return;
     }
     window.ALL_MATCHES=matches;
-    notifyGoals(matches); paint(matches); followFeatured(matches); stampNow('ESPN');
+    notifyGoals(matches); paint(matches); followFeatured(matches); stampNow('ESPN'); autoSubscribeFavorite(matches); renderScorers(matches);
     if(window.__pendingMatch){const id=window.__pendingMatch;window.__pendingMatch=null;openMatch(id);}
   }
   /* today only — fast live poll; patches live scores into the full set */
@@ -934,13 +958,33 @@
     if(el)el.textContent=`~${LIVE_MIN.num}:${String(LIVE_MIN.sec).padStart(2,'0')}`;
   },1000);
 
+  function renderScorers(matches){
+    const box=document.getElementById('scorersbox'); if(!box) return;
+    const tally={};
+    matches.forEach(m=>(m.goals||[]).forEach(g=>{
+      if(!g.scorer||g.own) return;
+      const team=g.team==='home'?m.home:m.away;
+      const key=g.scorer+'|'+team;
+      tally[key]=tally[key]||{scorer:g.scorer,team,count:0};
+      tally[key].count++;
+    }));
+    const top=Object.values(tally).sort((a,b)=>b.count-a.count).slice(0,10);
+    if(!top.length){ box.innerHTML='<p style="color:var(--mut);padding:12px 0">No goals scored yet.</p>'; return; }
+    box.innerHTML=`<table>
+      <tr><th>#</th><th style="text-align:left">Player</th><th style="text-align:left">Team</th><th>Goals</th></tr>
+      ${top.map((s,i)=>`<tr><td>${i+1}</td><td class="tm">${s.scorer}</td><td style="text-align:left">${s.team}</td><td class="pts">${s.count}</td></tr>`).join('')}
+    </table>`;
+  }
+
   const prevScore={};
   function notifyGoals(matches){
     matches.forEach(m=>{
       if(m.status==='SCHEDULED')return;
       const key=m.id, cur=m.homeScore+'-'+m.awayScore, was=prevScore[key];
       if(was!==undefined&&was!==cur&&m.status==='LIVE'){
-        const txt=`${m.home} ${m.homeScore}–${m.awayScore} ${m.away}  ·  ${m.minute||'LIVE'}`;
+        const latestGoal=(m.goals||[]).slice().sort((a,b)=>b.clockVal-a.clockVal)[0];
+        const scorerTxt=latestGoal&&latestGoal.scorer?`${latestGoal.scorer}${latestGoal.own?' (OG)':latestGoal.pk?' (pen)':''} ⚽  `:'';
+        const txt=`${scorerTxt}${m.home} ${m.homeScore}–${m.awayScore} ${m.away}  ·  ${m.minute||'LIVE'}`;
         if(!bellMatches.has(String(key))&&'Notification'in window&&Notification.permission==='granted')
           new Notification('⚽ GOAL — World Cup 2026',{body:txt,icon:'assets/icon.png',tag:'wc26-'+key});
         toast(txt);
@@ -953,6 +997,43 @@
   const VAPID_PUBLIC_KEY='BAZNbdcw4THu5EDX739q0ADRrsHkFPK8jH8P2wMiak58aR3Ix7s-l7UGZXM1KUowsrzwQihX9VUW6j3zRHs2cK4';
   const bellMatches=new Set(JSON.parse(localStorage.getItem('bellMatches')||'[]'));
   function saveBellMatches(){ localStorage.setItem('bellMatches',JSON.stringify([...bellMatches])); }
+
+  /* ---- Favorite team ---- */
+  function getFavTeam(){ return localStorage.getItem('favoriteTeam')||''; }
+  function setFavTeam(name){
+    localStorage.setItem('favoriteTeam',name);
+    document.getElementById('favbtnlabel').textContent=name||'Pick team';
+    if(window.ALL_MATCHES){ renderSchedule(window.ALL_MATCHES); autoSubscribeFavorite(window.ALL_MATCHES); }
+  }
+  function openFavPicker(){
+    const names=[...new Set((window.ALL_MATCHES||[]).flatMap(m=>[m.home,m.away]))].sort();
+    const cur=getFavTeam();
+    function draw(filter){
+      const f=(filter||'').toLowerCase();
+      document.getElementById('favlist').innerHTML=names.filter(n=>n.toLowerCase().includes(f)).map(n=>
+        `<div class="favteam${n===cur?' cur':''}" data-team="${n}">${n}${n===cur?' <span class="favstar">★ current</span>':''}</div>`
+      ).join('')||'<p style="color:var(--mut);padding:12px 0">No teams loaded yet.</p>';
+      document.querySelectorAll('#favlist .favteam').forEach(el=>el.addEventListener('click',()=>{
+        setFavTeam(el.dataset.team); closeFavPicker();
+      }));
+    }
+    draw('');
+    document.getElementById('favsearch').value='';
+    document.getElementById('favsearch').oninput=e=>draw(e.target.value);
+    document.getElementById('favmodal').classList.add('show');
+  }
+  function closeFavPicker(){ document.getElementById('favmodal').classList.remove('show'); }
+  document.getElementById('favmodal').addEventListener('click',e=>{if(e.target.id==='favmodal')closeFavPicker();});
+  async function autoSubscribeFavorite(matches){
+    const fav=getFavTeam(); if(!fav) return;
+    if(!('Notification'in window)||Notification.permission!=='granted') return;
+    const upcoming=matches.filter(m=>m.status==='SCHEDULED'&&(m.home===fav||m.away===fav)).sort((a,b)=>a.koMs-b.koMs);
+    for(const m of upcoming){
+      if(bellMatches.size>=5) break;
+      if(!bellMatches.has(String(m.id))) await toggleBell(m.id,null);
+    }
+  }
+  (function(){ const f=getFavTeam(); if(f) document.getElementById('favbtnlabel').textContent=f; })();
   function urlBase64ToUint8Array(base64String){
     const padding='='.repeat((4-base64String.length%4)%4);
     const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
