@@ -334,8 +334,6 @@
   .mdscore{font-family:Impact,sans-serif;font-size:34px;letter-spacing:1px}
   .mdmeta{text-align:center;font-size:11px;color:var(--mut);margin-bottom:16px}
   .mdsec{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);font-weight:800;margin:16px 2px 8px}
-  .watch{display:flex;gap:8px;flex-wrap:wrap}
-  .watch .ch{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700}
   .lncol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .lncol ul{list-style:none}
   .lncol li{font-size:12.5px;padding:3px 0;color:var(--txt);display:flex;gap:6px}
@@ -673,35 +671,6 @@
   }
   const isTBD=n=>/Winner R\d|TBD|Winner$|Loser$/i.test(n||'');
 
-  /* viewer country (keyless ipapi, timezone fallback) for "where to watch" */
-  window.GEO={code:'',name:''};
-  (async()=>{
-    try{ const g=await (await fetch('https://ipapi.co/json/')).json(); if(g&&g.country_code) window.GEO={code:g.country_code,name:g.country_name||g.country_code}; }
-    catch(e){ const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';
-      const guess={'America':'US','Europe/London':'GB','Europe/Paris':'FR','Europe/Berlin':'DE','Europe/Madrid':'ES','Australia':'AU','Asia/Kolkata':'IN','America/Mexico_City':'MX','America/Toronto':'CA','America/Sao_Paulo':'BR'};
-      window.GEO.code=guess[tz]||(tz.startsWith('America')?'US':'');
-    }
-  })();
-  /* official/licensed broadcasters by market (legal watch destinations) */
-  const BROADCAST={
-    US:[{n:'FOX',u:'https://www.fox.com/live/'},{n:'Telemundo',u:'https://www.telemundo.com/now'},{n:'Peacock',u:'https://www.peacocktv.com/'}],
-    GB:[{n:'BBC iPlayer',u:'https://www.bbc.co.uk/iplayer'},{n:'ITVX',u:'https://www.itv.com/watch'}],
-    CA:[{n:'TSN',u:'https://www.tsn.ca/'},{n:'RDS',u:'https://www.rds.ca/'}],
-    MX:[{n:'ViX',u:'https://vix.com'},{n:'TUDN',u:'https://www.tudn.com/'}],
-    AU:[{n:'Optus Sport',u:'https://sport.optus.com.au/'}],
-    BR:[{n:'Globoplay',u:'https://globoplay.globo.com/'}],
-    IN:[{n:'JioHotstar',u:'https://www.hotstar.com/in'}]
-  };
-  function whereToWatch(home,away){
-    const code=(window.GEO&&window.GEO.code)||'';
-    const chips=BROADCAST[code]||(code===''||code==='US'?BROADCAST.US:[]);
-    const search=`https://www.google.com/search?q=${encodeURIComponent('where to watch '+home+' vs '+away+' World Cup 2026')}`;
-    return `<div class="mdsec">Where to watch <span style="color:var(--mut);font-weight:600">· ${code||'your region'}</span></div>
-      <div class="watch">
-        ${chips.map(c=>`<a class="ch" href="${c.u}" target="_blank" rel="noopener">${c.n} ↗</a>`).join('')}
-        <a class="ch find" href="${search}" target="_blank" rel="noopener">Find broadcaster ↗</a>
-      </div>`;
-  }
   function mapEspn(d){
     return (d.events||[]).map(e=>{
       const c=e.competitions[0];
@@ -886,7 +855,6 @@
         <div class="mdteam">${m?crest(m.away,'','cr2'):''}<b>${m?m.away.toUpperCase():''}</b></div>
       </div>
       <div class="mdmeta">${m&&m.stage?m.stage+' · ':''}${m&&m.venue?m.venue:''}</div>
-      ${whereToWatch(m?m.home:'',m?m.away:'')}
       ${kev?`<div class="mdsec">Key events</div>${kev}`:''}
       ${rosters.length?`<div class="mdsec">Lineups</div><div class="lncol">${lineupCol(m.home)}${lineupCol(m.away)}</div>`:''}
       ${!bc.length&&!kev&&!rosters.length?'<p style="color:var(--mut);padding:20px;text-align:center">Details available closer to kickoff.</p>':''}
