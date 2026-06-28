@@ -26,8 +26,6 @@ export default async () => {
     if (doc) subsList.push({ key, ...doc });
   }
 
-  const now = Date.now();
-
   for (const e of events) {
     const c = e.competitions[0];
     const h = c.competitors.find(x => x.homeAway === 'home') || c.competitors[0];
@@ -37,16 +35,10 @@ export default async () => {
     const homeScore = h.score == null ? 0 : +h.score;
     const awayScore = a.score == null ? 0 : +a.score;
     const status = ST[c.status.type.state] || 'SCHEDULED';
-    const koMs = new Date(c.date).getTime();
     const goals = (c.details || []).filter(x => x.scoringPlay);
 
     const prev = await stateStore.get(id, { type: 'json' });
     const notifications = [];
-
-    if (status === 'SCHEDULED' && koMs - now > 0 && koMs - now <= 30 * 60 * 1000 && !(prev && prev.preKickoffSent)) {
-      const mins = Math.round((koMs - now) / 60000);
-      notifications.push({ tag: `prekickoff-${id}`, title: '⏰ Starting Soon', body: `${home} vs ${away} kicks off in ${mins} min` });
-    }
 
     if (prev) {
       if (prev.status !== 'LIVE' && status === 'LIVE') {
@@ -66,10 +58,7 @@ export default async () => {
       }
     }
 
-    await stateStore.setJSON(id, {
-      status, homeScore, awayScore,
-      preKickoffSent: (prev && prev.preKickoffSent) || notifications.some(n => n.tag.startsWith('prekickoff-'))
-    });
+    await stateStore.setJSON(id, { status, homeScore, awayScore });
 
     if (!notifications.length) continue;
 
