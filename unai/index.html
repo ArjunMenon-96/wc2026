@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Un-AI Text</title>
+<style>
+  :root {
+    --bg: #0e1116; --panel: #161b22; --border: #2a313c;
+    --text: #e6edf3; --muted: #8b949e; --accent: #2f81f7; --good: #3fb950;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, system-ui, sans-serif;
+    background: var(--bg); color: var(--text); padding: 24px;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; max-width: 760px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+  label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
+  textarea {
+    width: 100%; height: 360px; resize: vertical; padding: 12px;
+    background: var(--panel); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; font-family: ui-monospace, monospace; font-size: 13px; line-height: 1.5;
+  }
+  .group { margin: 10px 0; padding: 12px 14px; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 8px; }
+  .group h3 { margin: 0 0 8px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .opts { display: flex; flex-wrap: wrap; gap: 10px 18px; }
+  .opt { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+  .bar { display: flex; gap: 10px; align-items: center; margin: 14px 0; flex-wrap: wrap; }
+  button {
+    background: var(--accent); color: #fff; border: 0; padding: 10px 18px;
+    border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  button.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  button:active { transform: translateY(1px); }
+  .stats { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .stats b { color: var(--good); }
+  .warn { color: #d29922; }
+  #copied { color: var(--good); font-size: 13px; opacity: 0; transition: opacity .2s; }
+  #copied.show { opacity: 1; }
+  .outbox {
+    width: 100%; height: 360px; overflow: auto; padding: 12px;
+    background: var(--panel); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; font-family: ui-monospace, monospace; font-size: 13px;
+    line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+  }
+  .outbox mark {
+    background: #f1c40f; color: #1a1a00; border-radius: 2px; padding: 0 1px;
+  }
+  .legend { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }
+  .legend mark { background: #f1c40f; color: #1a1a00; padding: 0 3px; border-radius: 2px; }
+</style>
+</head>
+<body>
+  <h1>Un-AI Text</h1>
+  <div class="sub">Runs 100% locally and offline. Nothing leaves your browser. Strips hidden watermark chars, normalizes punctuation, swaps AI-cliche words, and (optionally) restructures the prose to read more human. Note: real paraphrasing needs an LLM. This is deterministic restructuring, not a guaranteed detector-beater.</div>
+
+  <div class="group">
+    <h3>Strip markers</h3>
+    <div class="opts">
+      <label class="opt"><input type="checkbox" id="o-invisible" checked> Invisible / zero-width chars</label>
+      <label class="opt"><input type="checkbox" id="o-spaces" checked> Weird spaces (NBSP, thin)</label>
+      <label class="opt"><input type="checkbox" id="o-punct" checked> Quotes / dashes / ellipsis</label>
+      <label class="opt"><input type="checkbox" id="o-emoji"> Strip emoji</label>
+      <label class="opt"><input type="checkbox" id="o-words" checked> AI giveaway words</label>
+      <label class="opt"><input type="checkbox" id="o-whitespace" checked> Collapse whitespace</label>
+    </div>
+  </div>
+
+  <div class="group">
+    <h3>Humanize (restructure)</h3>
+    <div class="opts">
+      <label class="opt"><input type="checkbox" id="h-contract" checked> Use contractions</label>
+      <label class="opt"><input type="checkbox" id="h-filler" checked> Cut filler openers</label>
+      <label class="opt"><input type="checkbox" id="h-split" checked> Split long sentences</label>
+      <label class="opt"><input type="checkbox" id="h-casual" checked> Casual word swaps</label>
+      <label class="opt"><input type="checkbox" id="h-vary" checked> Vary sentence length</label>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <label>Paste AI text here</label>
+      <textarea id="in" placeholder="Paste text…"></textarea>
+    </div>
+    <div>
+      <label>Cleaned output</label>
+      <div class="legend"><mark>yellow</mark> = changed or new vs. your input</div>
+      <div id="out" class="outbox"></div>
+    </div>
+  </div>
+
+  <div class="bar">
+    <button id="clean">Clean text</button>
+    <button class="ghost" id="copy">Copy output</button>
+    <button class="ghost" id="clear">Clear</button>
+    <span id="copied">Copied!</span>
+  </div>
+  <div class="stats" id="stats"></div>
+
+<script>
+// ---- AI giveaway word/phrase swaps -> simpler equivalents ----
+const WORD_SWAPS = [
+  [/\bdelve into\b/gi, "look at"], [/\bdelve\b/gi, "dig"],
+  [/\butilize\b/gi, "use"], [/\butilizing\b/gi, "using"], [/\butilization\b/gi, "use"],
+  [/\bleverage\b/gi, "use"], [/\bleveraging\b/gi, "using"],
+  [/\bfacilitate\b/gi, "help"], [/\bin order to\b/gi, "to"],
+  [/\ba myriad of\b/gi, "many"], [/\bmyriad\b/gi, "many"], [/\bplethora\b/gi, "plenty"],
+  [/\bin today's (fast-paced |digital |modern )?world\b/gi, "today"],
+  [/\bit is important to note that\b/gi, ""], [/\bit's important to note that\b/gi, ""],
+  [/\bit is worth noting that\b/gi, ""], [/\bneedless to say,?\s*/gi, ""],
+  [/\bfurthermore\b/gi, "also"], [/\bmoreover\b/gi, "also"], [/\badditionally\b/gi, "also"],
+  [/\bsubsequently\b/gi, "then"], [/\bconsequently\b/gi, "so"],
+  [/\bnevertheless\b/gi, "still"], [/\bnonetheless\b/gi, "still"],
+  [/\bhence\b/gi, "so"], [/\bthus\b/gi, "so"],
+  [/\bin conclusion,?\s*/gi, ""], [/\bin summary,?\s*/gi, ""], [/\bto sum up,?\s*/gi, ""],
+  [/\bembark on\b/gi, "start"], [/\bembark upon\b/gi, "start"],
+  [/\bseamless\b/gi, "smooth"], [/\bseamlessly\b/gi, "smoothly"],
+  [/\brobust\b/gi, "strong"], [/\bcomprehensive\b/gi, "full"],
+  [/\bgame-changer\b/gi, "big deal"], [/\btestament to\b/gi, "shows"],
+  [/\bunlock the potential\b/gi, "make the most"],
+  [/\bnavigate the (complexities|landscape) of\b/gi, "handle"],
+  [/\bcrucial\b/gi, "key"], [/\bpivotal\b/gi, "key"],
+  [/\bunderscores\b/gi, "shows"], [/\bunderscore\b/gi, "show"],
+  [/\bfoster\b/gi, "build"], [/\bencompass(es)?\b/gi, "cover"],
+];
+
+// ---- extra casual swaps used by humanize ----
+const CASUAL_SWAPS = [
+  [/\baligned closely with\b/gi, "matched"], [/\baligns? with\b/gi, "fits"],
+  [/\bcontribute to\b/gi, "help"], [/\bopportunity to\b/gi, "chance to"],
+  [/\bstood out to me\b/gi, "caught my eye"], [/\bstands out\b/gi, "stands out"],
+  [/\bI'd love the chance to\b/gi, "I'd like to"], [/\bI would love to\b/gi, "I'd like to"],
+  [/\bI'd love to\b/gi, "I'd like to"],
+  [/\bpassionate about\b/gi, "into"], [/\bdeeply\b/gi, ""],
+  [/\bin the realm of\b/gi, "in"], [/\bwith regard to\b/gi, "about"],
+  [/\bprior to\b/gi, "before"], [/\bnumerous\b/gi, "many"],
+  [/\bdemonstrate\b/gi, "show"], [/\bendeavor\b/gi, "try"],
+  [/\bregarding\b/gi, "about"], [/\bassist\b/gi, "help"],
+];
+
+// ---- contractions ----
+const CONTRACTIONS = [
+  [/\bI have\b/g, "I've"], [/\bI am\b/g, "I'm"], [/\bI will\b/g, "I'll"],
+  [/\bI would\b/g, "I'd"], [/\bI had\b/g, "I'd"],
+  [/\byou are\b/gi, m=>m[0]==='Y'?"You're":"you're"],
+  [/\bwe are\b/gi, m=>m[0]==='W'?"We're":"we're"],
+  [/\bthey are\b/gi, m=>m[0]==='T'?"They're":"they're"],
+  [/\bit is\b/gi, m=>m[0]==='I'?"It's":"it's"], [/\bit has\b/gi, m=>m[0]==='I'?"It's":"it's"],
+  [/\bthat is\b/gi, m=>m[0]==='T'?"That's":"that's"],
+  [/\bwho is\b/gi, m=>m[0]==='W'?"Who's":"who's"],
+  [/\bdo not\b/gi, m=>m[0]==='D'?"Don't":"don't"],
+  [/\bdoes not\b/gi, m=>m[0]==='D'?"Doesn't":"doesn't"],
+  [/\bdid not\b/gi, m=>m[0]==='D'?"Didn't":"didn't"],
+  [/\bcannot\b/gi, m=>m[0]==='C'?"Can't":"can't"], [/\bcan not\b/gi, "can't"],
+  [/\bwill not\b/gi, m=>m[0]==='W'?"Won't":"won't"],
+  [/\bis not\b/gi, "isn't"], [/\bare not\b/gi, "aren't"], [/\bwas not\b/gi, "wasn't"],
+  [/\bhave not\b/gi, "haven't"], [/\bhas not\b/gi, "hasn't"],
+  [/\bwould not\b/gi, "wouldn't"], [/\bcould not\b/gi, "couldn't"], [/\bshould not\b/gi, "shouldn't"],
+];
+
+// ---- filler openers to cut ----
+const FILLERS = [
+  /^I recently came across\b/gi, /^I recently\b/gi,
+  /\bWhat I enjoy most is\b/g, /\bWhat excites me (most )?is\b/g,
+  /\bI am writing to express my (strong )?interest in\b/gi,
+  /\bI am reaching out (to you )?(regarding|about)\b/gi,
+  /\bI wanted to reach out\b/gi, /\bI hope this (email|message) finds you well[.,]?/gi,
+];
+
+function clean(text, o) {
+  let t = text;
+  if (o.invisible) {
+    t = t.replace(/[​-‏‪-‮⁠-⁤⁪-⁯﻿­᠎]/g, "");
+    t = t.replace(/[︀-️]/g, ""); // variation selectors
+  }
+  if (o.spaces) t = t.replace(/[   -   　]/g, " ");
+  if (o.punct) {
+    t = t.replace(/[‘’‚‛′]/g, "'")
+         .replace(/[“”„‟″]/g, '"')
+         .replace(/\s*[—―]\s*/g, ", ")
+         .replace(/\s*–\s*/g, " - ")
+         .replace(/…/g, "...")
+         .replace(/−/g, "-")
+         .replace(/[·•]/g, "*");
+  }
+  if (o.emoji) t = t.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu, "");
+  if (o.words) {
+    for (const [re, rep] of WORD_SWAPS) t = t.replace(re, rep);
+  }
+  if (o.whitespace) {
+    t = t.replace(/[ \t]+/g, " ").replace(/ +\n/g, "\n").replace(/\n{3,}/g, "\n\n");
+  }
+  return t;
+}
+
+function capFirst(s){ return s.replace(/^(\s*)([a-z])/, (m,a,b)=>a+b.toUpperCase()); }
+function wordCount(s){ return (s.trim().match(/\S+/g)||[]).length; }
+
+function humanize(text, h) {
+  let t = text;
+
+  if (h.filler) {
+    for (const re of FILLERS) t = t.replace(re, "");
+    t = t.replace(/\b(felt|feel) it aligned closely with what I've been building\b/gi,
+                  "it lines up with what I've been doing");
+  }
+  if (h.casual) {
+    for (const [re, rep] of CASUAL_SWAPS) t = t.replace(re, rep);
+  }
+  if (h.contract) {
+    for (const [re, rep] of CONTRACTIONS) t = t.replace(re, rep);
+  }
+
+  // process per paragraph -> per sentence
+  const paras = t.split(/\n+/);
+  const outParas = paras.map(p => {
+    p = p.trim();
+    if (!p) return "";
+    // crude sentence split keeping terminators
+    let sentences = p.match(/[^.!?]+[.!?]+|\s*[^.!?]+$/g) || [p];
+    let result = [];
+    for (let s of sentences) {
+      s = s.trim();
+      if (!s) continue;
+
+      if (h.split && wordCount(s) > 20) {
+        // split at the first long-clause conjunction
+        const m = s.match(/^(.{20,}?[a-z])(,\s+(?:while|which|where|so that|because)\s+)(.+)$/i);
+        if (m && wordCount(m[1]) >= 5 && wordCount(m[3]) >= 4) {
+          let a = m[1].replace(/[,\s]+$/,'');
+          let b = m[3];
+          if (!/[.!?]$/.test(a)) a += ".";
+          result.push(a);
+          s = capFirst(b);
+        }
+      }
+      // don't force a period on greeting/sign-off lines (comma-ending,
+      // or a short Title-Case line like a name/signature)
+      const looksLikeName = wordCount(s) <= 3 && /^[A-Z][a-z]+(\s+[A-Z][a-z'.-]+)*$/.test(s);
+      if (!/[.!?,:]$/.test(s) && !looksLikeName) s += ".";
+      result.push(capFirst(s));
+    }
+
+    if (h.vary) {
+      // merge two consecutive very-short sentences for rhythm variety
+      const merged = [];
+      for (let i = 0; i < result.length; i++) {
+        const cur = result[i], nxt = result[i+1];
+        if (nxt && wordCount(cur) <= 6 && wordCount(nxt) <= 8) {
+          merged.push(cur.replace(/[.!?]+$/,'') + ", and " + nxt.charAt(0).toLowerCase() + nxt.slice(1));
+          i++;
+        } else merged.push(cur);
+      }
+      return merged.join(" ");
+    }
+    return result.join(" ");
+  });
+
+  t = outParas.join("\n");
+  // cleanup artifacts
+  t = t.replace(/\s{2,}/g, " ").replace(/ +([.,;:!?])/g, "$1")
+       .replace(/([.!?])\1+/g, "$1").replace(/ +\n/g, "\n").replace(/\n /g, "\n").trim();
+  return t;
+}
+
+const $ = id => document.getElementById(id);
+let lastOutput = "";
+
+function esc(s){ return s.replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+// word-level diff: highlight output words that aren't in the input (LCS-based)
+function diffHtml(aText, bText) {
+  const aWords = (aText.match(/\S+/g) || []).map(w=>w.toLowerCase());
+  const bTokens = bText.split(/(\s+)/);              // keep whitespace
+  const bWords = [];                                  // indices of word tokens
+  bTokens.forEach((t,i)=>{ if (/\S/.test(t)) bWords.push(i); });
+  const bLower = bWords.map(i=>bTokens[i].toLowerCase());
+
+  // LCS DP between aWords and bLower
+  const n=aWords.length, m=bLower.length;
+  const dp = Array.from({length:n+1},()=>new Int32Array(m+1));
+  for (let i=n-1;i>=0;i--) for (let j=m-1;j>=0;j--)
+    dp[i][j] = aWords[i]===bLower[j] ? dp[i+1][j+1]+1 : Math.max(dp[i+1][j], dp[i][j+1]);
+  const matched = new Set();   // b word-list indices that match input
+  let i=0,j=0;
+  while (i<n && j<m) {
+    if (aWords[i]===bLower[j]) { matched.add(j); i++; j++; }
+    else if (dp[i+1][j] >= dp[i][j+1]) i++; else j++;
+  }
+
+  let html="", w=0;
+  for (let k=0;k<bTokens.length;k++) {
+    const tok=bTokens[k];
+    if (/\S/.test(tok)) {
+      html += matched.has(w) ? esc(tok) : "<mark>"+esc(tok)+"</mark>";
+      w++;
+    } else html += esc(tok);
+  }
+  return html;
+}
+
+function run() {
+  const o = { invisible:$("o-invisible").checked, spaces:$("o-spaces").checked,
+    punct:$("o-punct").checked, emoji:$("o-emoji").checked,
+    words:$("o-words").checked, whitespace:$("o-whitespace").checked };
+  const h = { contract:$("h-contract").checked, filler:$("h-filler").checked,
+    split:$("h-split").checked, casual:$("h-casual").checked, vary:$("h-vary").checked };
+
+  const src = $("in").value;
+  let out = clean(src, o);
+  const humanizeOn = h.contract||h.filler||h.split||h.casual||h.vary;
+  if (humanizeOn) out = humanize(out, h);
+  lastOutput = out;
+  $("out").innerHTML = diffHtml(src, out);
+
+  const hidden = (src.match(/[​-‏‪-‮⁠-⁤﻿­  -   　︀-️]/g) || []).length;
+  const dashes = (src.match(/[–—―‘’“”…]/g) || []).length;
+  $("stats").innerHTML =
+    `Input ${src.length} → output ${out.length} chars. ` +
+    `Stripped <b>${hidden}</b> hidden/non-standard chars and <b>${dashes}</b> fancy punctuation marks.` +
+    (humanizeOn ? "" : ` <span class="warn">Humanize off — only markers removed.</span>`) +
+    (hidden===0 && dashes===0 && !humanizeOn ? ` <span class="warn">No markers found in this text.</span>` : "");
+}
+
+$("clean").onclick = run;
+$("copy").onclick = async () => {
+  await navigator.clipboard.writeText(lastOutput);
+  const c = $("copied"); c.classList.add("show"); setTimeout(()=>c.classList.remove("show"),1200);
+};
+$("clear").onclick = () => { $("in").value=""; lastOutput=""; $("out").innerHTML=""; $("stats").textContent=""; };
+$("in").addEventListener("input", run);
+document.querySelectorAll('input[type=checkbox]').forEach(c=>c.addEventListener("change", run));
+</script>
+</body>
+</html>
