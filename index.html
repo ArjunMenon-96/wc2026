@@ -146,11 +146,6 @@
   .btn{flex:1;text-align:center;padding:11px;border-radius:12px;font-weight:700;font-size:13px;border:1px solid var(--line);background:var(--card2);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur)}
   .btn.primary{background:var(--green);color:#0b1f12;border:none}
 
-  /* Tabs */
-  .tabs{display:flex;gap:6px;margin:18px 0 14px;overflow-x:auto;scrollbar-width:none}
-  .tabs::-webkit-scrollbar{display:none}
-  .tab{white-space:nowrap;padding:9px 15px;border-radius:999px;font-size:13px;font-weight:700;color:var(--mut);background:var(--card);border:1px solid var(--line);cursor:pointer;transition:.15s;backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur)}
-  .tab.active{color:#0b1f12;background:var(--green);border:none}
 
   section{display:none;animation:fade .25s}
   section.active{display:block}
@@ -395,15 +390,6 @@
   <!-- HERO LIVE (rendered from data/fixtures.json) -->
   <div class="hero" id="hero"></div>
 
-  <!-- TABS -->
-  <div class="tabs" id="tabs">
-    <div class="tab active" data-t="schedule">Schedule</div>
-    <div class="tab" data-t="videos">Live</div>
-    <div class="tab" data-t="groups">Groups</div>
-
-    <div class="tab" data-t="news">News</div>
-    <div class="tab" data-t="media">Media</div>
-  </div>
 
   <!-- SCHEDULE -->
   <section id="schedule" class="active">
@@ -423,7 +409,11 @@
   <section id="groups">
     <h2 class="st">Group Standings · Live</h2>
     <div id="groupsbox"><p style="color:var(--mut);padding:20px;text-align:center">Loading standings…</p></div>
-    <h2 class="st" style="margin-top:22px">WC2026 Awards</h2>
+  </section>
+
+  <!-- AWARDS -->
+  <section id="awards">
+    <h2 class="st">WC2026 Awards</h2>
     <div class="awardgrid" id="awardsbox"></div>
     <h2 class="st" style="margin-top:22px">Top Scorers · Golden Boot</h2>
     <div id="scorersbox"></div>
@@ -468,7 +458,7 @@
     <div class="nav-i active" data-t="schedule"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></span>Matches</div>
     <div class="nav-i" data-t="videos"><span class="ni"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="14" height="14" rx="2"/><path d="M16 9.5l5-2.5v10l-5-2.5"/></svg></span>Live</div>
     <div class="nav-i" data-t="groups"><span class="ni"><svg viewBox="0 0 24 24"><line x1="5" y1="20" x2="5" y2="11"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="19" y1="20" x2="19" y2="14"/></svg></span>Groups</div>
-
+    <div class="nav-i" data-t="awards"><span class="ni"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>Awards</div>
     <div class="nav-i" data-t="news"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="17" y2="13"/><line x1="7" y1="17" x2="13" y2="17"/></svg></span>News</div>
     <div class="nav-i" data-t="media"><span class="ni"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Media</div>
   </div>
@@ -485,6 +475,7 @@
     document.querySelectorAll('.nav-i').forEach(x=>x.classList.toggle('active',x.dataset.t===t));
     window.scrollTo({top:0,behavior:'smooth'});
     if(t==='groups')refreshGroups();
+    else if(t==='awards'){ if(window.ALL_MATCHES)renderScorers(window.ALL_MATCHES); }
     else if(t==='news')refreshNews();
     else if(t==='media')initMedia();
     else if(t==='videos'){
@@ -1079,24 +1070,31 @@
     const teams=remaining.length?remaining:[...new Set((window.ALL_MATCHES||[]).flatMap(m=>[m.home,m.away]))].sort();
     const sel=document.getElementById('mteams');
     const items=[
-      {label:'All WC2026',q:'FIFA World Cup 2026 goal celebration fans match player 2026'},
-      ...teams.map(t=>({label:t,q:`"${t}" "World Cup 2026" goal match player fan`}))
+      {label:'All WC2026',q:'2026 FIFA World Cup',cat:'2026_FIFA_World_Cup'},
+      ...teams.map(t=>({label:t,q:t+' 2026 FIFA World Cup',cat:''}))
     ];
-    sel.innerHTML=items.map((x,i)=>`<div class="mchip${i===0?' on':''}" data-q="${x.q}">${x.label}</div>`).join('');
+    sel.innerHTML=items.map((x,i)=>`<div class="mchip${i===0?' on':''}" data-q="${x.q}" data-cat="${x.cat}">${x.label}</div>`).join('');
     sel.querySelectorAll('.mchip').forEach(c=>c.addEventListener('click',()=>{
       sel.querySelectorAll('.mchip').forEach(x=>x.classList.remove('on'));
-      c.classList.add('on'); MEDIA_QUERY=c.dataset.q; loadMedia();
+      c.classList.add('on');
+      MEDIA_QUERY=c.dataset.q; MEDIA_CAT=c.dataset.cat; loadMedia();
     }));
   }
 
-  const MEDIA_EXCLUDE=/logo|icon|coat.of.arm|badge|crest|emblem|kit|jersey|shirt|map|stamp|poster.art|vector|svg/i;
+  let MEDIA_CAT='2026_FIFA_World_Cup';
+  const MEDIA_EXCLUDE=/logo|icon|coat.of.arm|badge|crest|emblem|kit|jersey|shirt|map|stamp|vector|\.svg/i;
 
   async function loadMedia(){
     const box=document.getElementById('mgrid');
     box.innerHTML='<p style="color:var(--mut);padding:20px;text-align:center;grid-column:1/-1">Loading…</p>';
     try{
-      const q=encodeURIComponent(MEDIA_QUERY);
-      const url=`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${q}&gsrnamespace=6&gsrlimit=50&prop=imageinfo&iiprop=url|thumburl|mime|size&iiurlwidth=500&format=json&origin=*`;
+      let url;
+      if(MEDIA_CAT){
+        url=`https://commons.wikimedia.org/w/api.php?action=query&generator=categorymembers&gcmtitle=Category:${MEDIA_CAT}&gcmnamespace=6&gcmlimit=60&prop=imageinfo&iiprop=url|thumburl|mime|size&iiurlwidth=500&format=json&origin=*`;
+      } else {
+        const q=encodeURIComponent(MEDIA_QUERY);
+        url=`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${q}&gsrnamespace=6&gsrlimit=60&prop=imageinfo&iiprop=url|thumburl|mime|size&iiurlwidth=500&format=json&origin=*`;
+      }
       const d=await(await fetch(url)).json();
       const pages=Object.values((d.query&&d.query.pages)||{})
         .filter(p=>{
@@ -1104,12 +1102,12 @@
           const ii=p.imageinfo[0];
           if(!/jpeg|jpg|png/i.test(ii.mime||'')) return false;
           if(MEDIA_EXCLUDE.test(p.title||'')) return false;
-          const w=ii.width||0, h=ii.height||0;
-          if(w<400||h<250) return false; // skip thumbnails/icons
+          if((ii.width||0)<500||(ii.height||0)<300) return false;
           return true;
         })
+        .sort(()=>Math.random()-.5)
         .slice(0,20);
-      if(!pages.length){ box.innerHTML='<p style="color:var(--mut);padding:20px;text-align:center;grid-column:1/-1">No match photos found yet - try another team.</p>'; return; }
+      if(!pages.length){ box.innerHTML='<p style="color:var(--mut);padding:20px;text-align:center;grid-column:1/-1">No photos found yet - try another team.</p>'; return; }
       box.innerHTML=pages.map(p=>{
         const ii=p.imageinfo[0];
         return `<div class="mitem"><img src="${ii.thumburl||ii.url}" loading="lazy"><a class="mdl" href="${ii.url}" target="_blank" rel="noopener">Save</a></div>`;
