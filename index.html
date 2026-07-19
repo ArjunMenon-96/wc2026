@@ -713,6 +713,7 @@
       if(btnCr)btnCr.style.display='';
       if(legend)legend.style.display='none';
       if(SCHED_VIEW==='upcoming')SCHED_VIEW='results';
+      document.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.view===SCHED_VIEW));
       // Replace Live tab content with creator info
       const vidSec=document.getElementById('videos');
       if(vidSec&&!vidSec.dataset.replaced){
