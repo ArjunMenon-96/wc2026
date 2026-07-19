@@ -662,11 +662,15 @@
       const note=(c.notes&&c.notes[0]&&c.notes[0].headline)||'';
       const gm=note.match(/Group\s+([A-L])/i);
       const nm=e.name||'';
+      const slug=(e.season&&e.season.slug)||'';
       const round = /Final/i.test(nm)&&!/Semi|Quarter/i.test(nm) ? (/Third/i.test(nm)?'Third Place':'Final')
                   : /Semifinal/i.test(nm) ? 'Semifinals'
                   : /Quarterfinal/i.test(nm) ? 'Quarterfinals'
                   : /Round of 16/i.test(nm) ? 'Round of 16'
                   : /Round of 32/i.test(nm) ? 'Round of 32'
+                  : slug==='final' ? 'Final'
+                  : slug==='semifinals' ? 'Semifinals'
+                  : /3rd.place/i.test(slug)||/third.place/i.test(slug) ? 'Third Place'
                   : '';
       const goals=(c.details||[]).filter(x=>x.scoringPlay).map(x=>({
         scorer:(x.athletesInvolved&&x.athletesInvolved[0]&&x.athletesInvolved[0].displayName)||'',
